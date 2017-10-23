@@ -57,7 +57,6 @@ public class InvertedIndex extends Configured implements Tool {
     public static class InvertedIndexReducer extends Reducer<Text,Text,Text,Text>{
         Text value=new Text();
         protected void reduce(Text key,Iterable<Text> values,Context context) throws IOException,InterruptedException {
-//            Text value=new Text();
             String str = new String();
             for (Text t : values) {
                 str+=t.toString()+";"+"\n";
@@ -96,8 +95,8 @@ public class InvertedIndex extends Configured implements Tool {
         return 0;
     }
 
-//    public static void main(String[] args) throws Exception{
-//        System.setProperty("hadoop.home.dir", "E:\\hadoop");
-//        ToolRunner.run(new InvertedIndex(),args);
-//    }
+    public static void main(String[] args) throws Exception{
+        System.setProperty("hadoop.home.dir", "E:\\hadoop");
+        ToolRunner.run(new InvertedIndex(),args);
+    }
 }
