@@ -62,7 +62,7 @@ public class Join extends Configured implements Tool {
         IntWritable v = new IntWritable();
 
         /**
-         * 处理的时候要注意是left join还是right join,本示例为left join
+         * 处理的时候要注意是left join还是right join,本示例为left join,客户表与order表示一对多的关系
          */
         @Override
         protected void reduce(IntWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
@@ -90,13 +90,13 @@ public class Join extends Configured implements Tool {
 
     public int run(String[] strings) throws Exception {
         Configuration conf = getConf();
-        conf.set("mapreduce.job.jar", "out/artifacts/MapReduceDemo_jar/MapReduceDemo.jar");
+        conf.set("mapreduce.job.jar", "./target/MRExp-1.0-SNAPSHOT.jar");
         conf.set("mapreduce.app-submission.cross-platform", "true");
 
         Job job = Job.getInstance(conf, "sql_join");
 
         job.setJarByClass(Join.class);
-        Path job_output = new Path("/user/longhao/out");
+        Path job_output = new Path("/user/scdx03/out");
 
         job.setMapOutputKeyClass(IntWritable.class);
         job.setMapOutputValueClass(Text.class);
@@ -110,7 +110,7 @@ public class Join extends Configured implements Tool {
         job.setInputFormatClass(TextInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
 
-        FileInputFormat.setInputPaths(job, new Path("/user/longhao/statistical_input"));
+        FileInputFormat.setInputPaths(job, new Path("/user/scdx03/statistical_input"));
         job_output.getFileSystem(conf).delete(job_output, true);
         FileOutputFormat.setOutputPath(job, job_output);
 

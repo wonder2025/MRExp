@@ -69,13 +69,13 @@ public class Statistical extends Configured implements Tool {
 
     public int run(String[] strings) throws Exception {
         Configuration conf = getConf();
-        conf.set("mapreduce.job.jar", "out/artifacts/MapReduceDemo_jar/MapReduceDemo.jar");
+        conf.set("mapreduce.job.jar", "./target/MRExp-1.0-SNAPSHOT.jar");
         conf.set("mapreduce.app-submission.cross-platform", "true");
 
         Job job = Job.getInstance(conf, "sql_statistical");
 
         job.setJarByClass(Statistical.class);
-        Path job_output = new Path("/user/longhao/out");
+        Path job_output = new Path("/user/scdx03/out");
 
         job.setMapOutputKeyClass(Text.class);
         job.setMapOutputValueClass(IntWritable.class);
@@ -89,7 +89,7 @@ public class Statistical extends Configured implements Tool {
         job.setInputFormatClass(TextInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
 
-        FileInputFormat.setInputPaths(job, new Path("/user/longhao/statistical_input/customer.txt"));
+        FileInputFormat.setInputPaths(job, new Path("/user/scdx03/statistical_input/customer.txt"));
         job_output.getFileSystem(conf).delete(job_output, true);
         FileOutputFormat.setOutputPath(job, job_output);
         job.waitForCompletion(true);
