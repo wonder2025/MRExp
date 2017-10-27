@@ -14,8 +14,9 @@ import java.io.IOException;
  * 1.按unixtime从小到大进行排序
  * 2.添加OFF位的unixtime(当前时段的最后时间)
  * 3.从大到小一次相减得到每个位置的停留时间
+ * mapper类主要做什么
+ * [0000000000,00000174,2016-02-21 00:33:280000000000][imsi, pos, time]-->mapper-->[0000000000,00-09,00000174,day][imsi,timeflag ,pos,day] 括号中前面两个是key后面两个是value
  */
-//public class Mapper extends org.apache.hadoop.mapreduce.Mapper<LongWritable, Text, Text, Text> {
 public class Mapper extends org.apache.hadoop.mapreduce.Mapper<LongWritable, Text, Text, Text> {
 
     //进行数据格式化操作
@@ -40,6 +41,7 @@ public class Mapper extends org.apache.hadoop.mapreduce.Mapper<LongWritable, Tex
         //获得输入的文件名
         FileSplit fileSplit = (FileSplit) context.getInputSplit();
         String fileName = fileSplit.getPath().getName();
+        //判断载入的是哪个文件
         if (fileName.startsWith("pos")) {
             this.isPos = true;
         } else if (fileName.startsWith("net")) {
@@ -52,8 +54,10 @@ public class Mapper extends org.apache.hadoop.mapreduce.Mapper<LongWritable, Tex
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
         try {
+            //数据整理
+            //[0000000000,00000174，2016-02-21 00:33:280000000000][imsi, pos, time]-->mapper-->[0000000000,00-09,00000174,2016-02-21 00:33:28][imsi,timeflag pos,day] 括号中前面两个是key后面两个是value
             lineFormater.format(value.toString(), this.isPos, this.time, this.timepoint);
-        } catch (LineException e) {
+        } catch (LineException e) {//捕获异常
             if (e.getFlag() == -1) {
                 context.getCounter(Counter.OUTOFTIMESKIP).increment(1);
             } else if (e.getFlag() == 0) {
@@ -64,7 +68,7 @@ public class Mapper extends org.apache.hadoop.mapreduce.Mapper<LongWritable, Tex
         } catch (Exception ex) {
             context.getCounter(Counter.LINESKIP).increment(1);
         }
-        //输出格式[0000000000,00-09  00000174,day]    imsi,timeflag    pos,day
+        //输出格式[0000000000,00-09  00000174,2016-02-21 00:33:28]    imsi,timeflag    pos,day
         context.write(lineFormater.outKey(), lineFormater.outValue());
 
     }

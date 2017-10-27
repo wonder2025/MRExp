@@ -40,7 +40,7 @@ public class LineFormater {
             this.pos = words[2];
             this.time = words[3];
         }
-        //如果不是当前日期的数据,则过滤并统计异常
+        //如果不是当前日期的数据,则过滤并统计异常 判断是否是用户启动程序的时候输入的日期
         if (!this.time.startsWith(date)) {
             throw new LineException("Incorrect datetime!", -1);
         }
@@ -53,23 +53,27 @@ public class LineFormater {
 
         //根据time字段计算timeflag过程
         //从time中获得当前的小时信息
-        Integer hour = Integer.valueOf(time.split(" ")[1].split(":")[0]);
+        //只处理一行数据，即一次处理一个time
+        Integer hour = Integer.valueOf(time.split(" ")[1].split(":")[0]);//比如2016-02-21 00:33:280000000000输出00
         //在数据长度中循环timepoint[09,18,24]
-        for (int i = 0; i < timepoint.length; i++) {
-            if (Integer.parseInt(timepoint[i]) <= hour) {
+        //例如 07，18，21
+        for (int i = 0; i < timepoint.length; i++) {//timepoint为[09,18,24]
+            if (Integer.parseInt(timepoint[i]) <= hour) { //09<=25
                 try {
                     //如果大于当前时间段,则暂时设置为[当前时间]-[当前时段+1],在下个循环中继续判断
                     //需要考虑到hour大于最大时段的情况,抛出异常进行统计
+                    //hour如果是25此时i是2，则timepoint[2 + 1]会有越界错误，这样时间段就锁定在了上次[18,24],也就是超过24点的时间段就在在[18,24]
                     this.timeflag = timepoint[i] + "-" + timepoint[i + 1];
                 } catch (Exception ex) {
                     throw new LineException("Current hour is bigger than the max-timepoint!", 1);
                 }
             } else {
                 //如果小于当前时段,则必定是[当前时段-1]-[当前时段]
-                //如果是一次循环,则应该是从00时段开始
+                //如果是第一次循环,则应该是从00时段开始
                 if (i == 0) {
                     this.timeflag = "00-" + timepoint[i];
                 } else {
+                    //07
                     this.timeflag = timepoint[i - 1] + "-" + timepoint[i];
                 }
                 break;

@@ -62,10 +62,13 @@ public class Util {
      * @return key为unixtime, value为pos
      */
     public static TreeMap<Long, String> getSortedData(Reducer.Context context, Iterable<Text> values) {
+        //[0000000000,00-09 {  (00000174,2016-02-21 00:33:28)(...)(...).....}][imsi,timeflag (pos,day)(...)...]
         TreeMap<Long, String> sortedData = new TreeMap<Long, String>();
         for (Text v : values) {
             String[] vs = v.toString().split(",");
             try {
+                //00000174,2016-02-21 00:33:28
+                //根据时间进行排序
                 sortedData.put(Long.parseLong(vs[1]), vs[0]);
             } catch (NumberFormatException num) {
                 context.getCounter(Counter.TIMESKIP).increment(1);

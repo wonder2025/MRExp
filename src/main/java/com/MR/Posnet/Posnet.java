@@ -18,10 +18,12 @@ import org.apache.hadoop.util.ToolRunner;
 /**
  * Created by longhao on 2017/8/1.
  * Email: longhao1@email.szu.edu.cn
+ *
  */
 public class Posnet extends Configured implements Tool {
-
+//args为用户传入的参数数组
     public  int run(String[] args) throws Exception {
+        //检查用户传入的参数数组是否齐全
         if (args.length < 3) {
             System.err.println("");
             System.err.println("Usage: Posnet <date> <timepoint> <isTotal>");
@@ -31,6 +33,7 @@ public class Posnet extends Configured implements Tool {
         Configuration conf = getConf();
         conf.set("date", args[1]);
         conf.set("timepoint", args[2]);
+        //jar包所在路径
         conf.set("mapreduce.job.jar", "./target/MRExp-1.0-SNAPSHOT.jar");
 //        conf.set("mapreduce.job.jar", "./out/artifacts/MRExp_jar/MRExp.jar");
         conf.set("mapreduce.app-submission.cross-platform", "true");
@@ -39,7 +42,9 @@ public class Posnet extends Configured implements Tool {
         job.setJarByClass(Posnet.class);
         Path job_output = new Path("/user/scdx03/out");
         Path job_input = new Path("/user/scdx03/input/pos.txt");
+        //reduce输出key类型
         job.setOutputKeyClass(Text.class);
+        //reduce输出value类型
         job.setOutputValueClass(Text.class);
         job.setMapperClass(Mapper.class);
         if (args[3].equals("1")) {
@@ -49,11 +54,17 @@ public class Posnet extends Configured implements Tool {
             job.setReducerClass(Reducer.class);
         }
         job.setNumReduceTasks(1);
+        //输入文件类型
         job.setInputFormatClass(TextInputFormat.class);
+        //输出文件类型
         job.setOutputFormatClass(TextOutputFormat.class);
+        //设置输入文件路径
         FileInputFormat.setInputPaths(job, job_input);
+        //如果存在输出结果则先删除
         job_output.getFileSystem(conf).delete(job_output, true);
+        //设置输出路径
         FileOutputFormat.setOutputPath(job, job_output);
+        //等待mapreduce执行完
         job.waitForCompletion(true);
         return 0;
     }

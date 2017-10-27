@@ -1,5 +1,5 @@
 package com.MR.Posnet;
-
+//枚举类型，异常情况类型举例
 public enum Counter {
     TIMESKIP,     //时间格式有误
     OUTOFTIMEFLASGSKIP,    //时间超出最大时段
