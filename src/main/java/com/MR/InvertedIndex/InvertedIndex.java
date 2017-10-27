@@ -31,7 +31,7 @@ public class InvertedIndex extends Configured implements Tool {
         protected void map( LongWritable key, Text value,Context context) throws IOException,InterruptedException{
             fileSplit=(FileSplit)context.getInputSplit();
             StringTokenizer stk = new StringTokenizer(value.toString());
-            while (stk.hasMoreElements()) {
+                while (stk.hasMoreElements()) {
                 k.set(stk.nextToken() + ">" + fileSplit.getPath().toString());
                 v.set("1");
                 context.write(k, v);
