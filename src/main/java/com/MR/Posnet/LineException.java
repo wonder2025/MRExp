@@ -1,8 +1,6 @@
 package com.MR.Posnet;
 
 /**
- * Created by xiaohei on 16/2/21.
- *
  * 自定义的异常类,提供异常统计帮助
  */
 public class LineException extends Exception {

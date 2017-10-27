@@ -22,36 +22,42 @@ import java.util.regex.Pattern;
 
 public class GroupBy extends Configured implements Tool {
     public static final Pattern SPARATOR = Pattern.compile("[,]");
+
     //自定义writer接口
     protected static class IntPair implements WritableComparable<IntPair> {
         private int first = 0;
         private int second = 0;
 
-        public void set(int left,int right){
+        public void set(int left, int right) {
             first = left;
             second = right;
         }
-        public int getFirst(){
+
+        public int getFirst() {
             return first;
         }
 
-        public int getSecond(){
+        public int getSecond() {
             return second;
         }
+
         //反序列化，从流中的二进制转换成IntPair
         public void readFields(DataInput in) throws IOException {
             first = in.readInt();
             second = in.readInt();
         }
+
         //序列化，将IntPair转化成使用流传送的二进制
         public void write(DataOutput out) throws IOException {
             out.writeInt(first);
             out.writeInt(second);
         }
+
         @Override
         public int hashCode() {
-            return first+"".hashCode() + second+"".hashCode();
+            return first + "".hashCode() + second + "".hashCode();
         }
+
         @Override
         public boolean equals(Object right) {
             if (right instanceof IntPair) {
@@ -61,7 +67,8 @@ public class GroupBy extends Configured implements Tool {
                 return false;
             }
         }
-        //对key排序时，调用的就是这个compareTo方法        //map做了个局部的排序
+
+        //对key排序时，调用的就是这个compareTo方法
         public int compareTo(IntPair o) {
             if (first != o.first) {
                 return first - o.first;
@@ -73,49 +80,59 @@ public class GroupBy extends Configured implements Tool {
         }
 
     }
+
     public static class GroupByMapper extends Mapper<LongWritable, Text, IntPair, IntWritable> {
 
         private final IntPair key = new IntPair();
         private final IntWritable value = new IntWritable();
 
         @Override
-        public void map(LongWritable inKey, Text inValue,Context context) throws IOException, InterruptedException {
+        public void map(LongWritable inKey, Text inValue, Context context) throws IOException, InterruptedException {
+            //切分一行数据
             String[] tokens = SPARATOR.split(inValue.toString());
-            int first= Integer.parseInt(tokens[0]);
-            int second= Integer.parseInt(tokens[1]);
+            //得到第一个数
+            int first = Integer.parseInt(tokens[0]);
+            //得到第二个数
+            int second = Integer.parseInt(tokens[1]);
 
             key.set(first, second);
             value.set(second);
             context.write(key, value);
+//            在之后的partition阶段对key进行排序，调用IntPair的compareTo方法
         }
     }
-    //每个文件中的处理Combiner，仅仅局限在mapper所在的节点上
-    public static class GroupByCombiner extends Reducer<IntPair, IntWritable,IntPair, IntWritable> {
-        private IntWritable v=new IntWritable();
 
-        protected void reduce(IntPair key,Iterable<IntWritable> values,Context context) throws IOException,InterruptedException {
+    //每个文件中的处理Combiner，仅仅局限在mapper所在的节点上
+    public static class GroupByCombiner extends Reducer<IntPair, IntWritable, IntPair, IntWritable> {
+        private IntWritable v = new IntWritable();
+
+        //计算每个key的个数，
+        protected void reduce(IntPair key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
             int counts = 0;
             for (IntWritable t : values) {
                 counts += 1;
             }
             v.set(counts);
-            context.write(key,v);
+            context.write(key, v);
         }
     }
 
     public static class GroupByReducer extends Reducer<IntPair, IntWritable, NullWritable, Text> {
         Text out = new Text();
+
         @Override
         public void reduce(IntPair key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
             int counts = 0;
-            for (IntWritable t: values) {
+            //计算key的总和
+            for (IntWritable t : values) {
                 counts += Integer.parseInt(t.toString());
             }
-            String builder = key.getFirst() + "|" +key.getSecond() + "|" +counts ;
+            String builder = key.getFirst() + "|" + key.getSecond() + "|" + counts;
             out.set(builder);
             context.write(NullWritable.get(), out);
         }
     }
+
     public int run(String[] strings) throws Exception {
         Configuration conf = getConf();
         conf.set("mapreduce.job.jar", "./target/MRExp-1.0-SNAPSHOT.jar");
@@ -128,13 +145,15 @@ public class GroupBy extends Configured implements Tool {
 
         job.setMapOutputKeyClass(IntPair.class);
         job.setMapOutputValueClass(IntWritable.class);
-
+        //设置reduce的输出key的类型
         job.setOutputKeyClass(Text.class);
+        //设置reduce的输出的类型
         job.setOutputValueClass(IntWritable.class);
 
         job.setMapperClass(GroupByMapper.class);
         job.setCombinerClass(GroupByCombiner.class);
         job.setReducerClass(GroupByReducer.class);
+        //只有一个，此时输出的key有序
         job.setNumReduceTasks(1);
         job.setInputFormatClass(TextInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
@@ -146,6 +165,7 @@ public class GroupBy extends Configured implements Tool {
         job.waitForCompletion(true);
         return 0;
     }
+
     public static void main(String[] args) throws Exception {
         ToolRunner.run(new GroupBy(), args);
     }

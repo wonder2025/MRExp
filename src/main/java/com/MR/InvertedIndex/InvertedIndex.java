@@ -32,6 +32,7 @@ public class InvertedIndex extends Configured implements Tool {
             fileSplit=(FileSplit)context.getInputSplit();
             StringTokenizer stk = new StringTokenizer(value.toString());
                 while (stk.hasMoreElements()) {
+                    //单词加上读取文件的路径
                 k.set(stk.nextToken() + ">" + fileSplit.getPath().toString());
                 v.set("1");
                 context.write(k, v);
@@ -56,9 +57,11 @@ public class InvertedIndex extends Configured implements Tool {
 
     public static class InvertedIndexReducer extends Reducer<Text,Text,Text,Text>{
         Text value=new Text();
+        //key=单词 value=[{文件路径1：在该文件中出现的次数1}{文件路径2：在该文件中出现的次数2}...]
         protected void reduce(Text key,Iterable<Text> values,Context context) throws IOException,InterruptedException {
             String str = new String();
             for (Text t : values) {
+                //将value做连接
                 str+=t.toString()+";"+"\n";
             }
             value.set(str);

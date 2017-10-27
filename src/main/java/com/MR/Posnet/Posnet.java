@@ -16,12 +16,11 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 /**
- * Created by longhao on 2017/8/1.
- * Email: longhao1@email.szu.edu.cn
+ * 程序的主类
  *
  */
 public class Posnet extends Configured implements Tool {
-//args为用户传入的参数数组
+    //args为用户传入的参数数组
     public  int run(String[] args) throws Exception {
         //检查用户传入的参数数组是否齐全
         if (args.length < 3) {
@@ -35,7 +34,7 @@ public class Posnet extends Configured implements Tool {
         conf.set("timepoint", args[2]);
         //jar包所在路径
         conf.set("mapreduce.job.jar", "./target/MRExp-1.0-SNAPSHOT.jar");
-//        conf.set("mapreduce.job.jar", "./out/artifacts/MRExp_jar/MRExp.jar");
+        //跨平台
         conf.set("mapreduce.app-submission.cross-platform", "true");
         //使用统计最长停留时间的reducer
         Job job = Job.getInstance(conf,"posnet");
@@ -46,6 +45,7 @@ public class Posnet extends Configured implements Tool {
         job.setOutputKeyClass(Text.class);
         //reduce输出value类型
         job.setOutputValueClass(Text.class);
+        //设置map类
         job.setMapperClass(Mapper.class);
         if (args[3].equals("1")) {
             job.setReducerClass(TotalReducer.class);
@@ -53,6 +53,7 @@ public class Posnet extends Configured implements Tool {
         else{
             job.setReducerClass(Reducer.class);
         }
+        //设置reduce的个数
         job.setNumReduceTasks(1);
         //输入文件类型
         job.setInputFormatClass(TextInputFormat.class);

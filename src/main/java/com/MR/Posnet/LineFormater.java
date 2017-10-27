@@ -7,8 +7,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Created by xiaohei on 16/2/21.
- *
  * 根据每行数据格式化,生成对应的实体对象
  * 主要提供format方法进行数据格式化
  */
@@ -23,11 +21,12 @@ public class LineFormater {
 
     /**
      * 数据格式化的方法,并提供了验证数据合法性的流程
-     * @param line 每行数据
-     * @param isPos 该行数据是POS还是NET
-     * @param date 要处理的日志(只处理这个日期的数据)
+     *
+     * @param line      每行数据
+     * @param isPos     该行数据是POS还是NET
+     * @param date      要处理的日志(只处理这个日期的数据)
      * @param timepoint 要统计的时间段,格式为[09,18,24],表示统计00-09,09-18,18-24三个时间段的信息
-     * */
+     */
     public void format(String line, Boolean isPos, String date, String[] timepoint) throws LineException {
         String[] words = line.split("\t");
         //根据不同数据的格式截取需要的信息
@@ -83,14 +82,14 @@ public class LineFormater {
 
     /**
      * 将imsi和timeflag作为key输出0000000000,00-09
-     * */
+     */
     public Text outKey() {
         return new Text(this.imsi + "," + this.timeflag);
     }
 
     /**
      * 将pos和day()  00000174,day
-     * */
+     */
     public Text outValue() {
         return new Text(this.pos + "," + this.day.getTime() / 1000L);
     }

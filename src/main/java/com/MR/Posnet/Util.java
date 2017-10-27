@@ -9,9 +9,8 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 /**
-        * Created by longhao on 2017/8/1.
-        * 通用工具类
-        */
+ * 通用工具类
+ */
 public class Util {
 
     /**
@@ -33,10 +32,12 @@ public class Util {
      * @return key为pos, value为该pos的停留时间
      */
     public static HashMap<String, Float> calcStayTime(TreeMap<Long, String> sortDatas) {
+        //  sortDatas是的treemap放入形如 2016-02-21 00:33:28，00000174的数据
         HashMap<String, Float> resMap = new HashMap<String, Float>();
+
         Iterator<Long> iter = sortDatas.keySet().iterator();
         Long currentTimeflag = iter.next();
-        //遍历treemap
+        //遍历treemap 每次在某个基站停留的时间
         while (iter.hasNext()) {
             Long nextTimeflag = iter.next();
             float diff = (nextTimeflag - currentTimeflag) / 60.0f;
@@ -44,6 +45,7 @@ public class Util {
             if (diff <= 60.0) {
                 String currentPos = sortDatas.get(currentTimeflag);
                 if (resMap.containsKey(currentPos)) {
+                    //如果resMap中已经存在pos则直接叠加时间
                     resMap.put(currentPos, resMap.get(currentPos) + diff);
                 } else {
                     resMap.put(currentPos, diff);
