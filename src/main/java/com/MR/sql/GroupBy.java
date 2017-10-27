@@ -31,7 +31,6 @@ public class GroupBy extends Configured implements Tool {
             first = left;
             second = right;
         }
-
         public int getFirst(){
             return first;
         }
